@@ -41,9 +41,6 @@ public class Representant {
     public Double getCaRepresentant() { return caRepresentant; }
     public void setCaRepresentant(Double caRepresentant) { this.caRepresentant = caRepresentant; }
 
-    public List<Client> getLesClients() {
-        return lesClients;
-    }
-
+    public List<Client> getLesClients() { return lesClients; }
     public void setLesClients(List<Client> lesClients) { this.lesClients = lesClients; }
 }

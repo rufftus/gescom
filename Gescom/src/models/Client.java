@@ -1,92 +1,74 @@
 package models;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Client {
-
     private int idClient;
     private String raisonSociale;
     private double caClient;
+
     private Categorie uneCategorie;
-    private ArrayList<Commande> lesCommandes;
-
-    public int getIdClient() {
-        return idClient;
-    }
-
-    public void setIdClient(int idClient) {
-        this.idClient = idClient;
-    }
-
-    public String getRaisonSociale() {
-        return raisonSociale;
-    }
-
-    public void setRaisonSociale(String raisonSociale) {
-        this.raisonSociale = raisonSociale;
-    }
-
-    public double getCaClient() {
-        return caClient;
-    }
-
-    public void setCaClient(double caClient) {
-        this.caClient = caClient;
-    }
-
-    public Categorie getUneCategorie() {
-        return uneCategorie;
-    }
-
-    public void setUneCategorie(Categorie uneCategorie) {
-        this.uneCategorie = uneCategorie;
-    }
-
-    public ArrayList<Commande> getLesCommandes() {
-        return lesCommandes;
-    }
-
-    private void setLesCommandes(ArrayList<Commande> lesCommandes) {
-        this.lesCommandes = lesCommandes;
-    }
+    private List<Commande> lesCommandes;
 
     public Client(int idClient, String raisonSociale, Categorie uneCategorie) {
         this.idClient = idClient;
         this.raisonSociale = raisonSociale;
         this.uneCategorie = uneCategorie;
-        this.caClient = 0;
-        this.lesCommandes = new ArrayList<Commande>();
+        this.caClient = 0.0;
+        setLesCommandes(); // Instanciation via setter privé
     }
 
-    public void ajouterCommande(Commande uneCommande) {
-        if (getLesCommandes() == null) {
-            setLesCommandes(new ArrayList<Commande>());
-        }
+    private void setLesCommandes() {
+        this.lesCommandes = new ArrayList<>();
+    }
 
-        if (!getLesCommandes().contains(uneCommande)) {
+    public int getIdClient() { return idClient; }
+    public void setIdClient(int idClient) { this.idClient = idClient; }
+
+    public String getRaisonSociale() { return raisonSociale; }
+    public void setRaisonSociale(String raisonSociale) { this.raisonSociale = raisonSociale; }
+
+    public double getCaClient() { return caClient; }
+    public void setCaClient(double caClient) { this.caClient = caClient; }
+
+    public Categorie getUneCategorie() { return uneCategorie; }
+    public void setUneCategorie(Categorie uneCategorie) { this.uneCategorie = uneCategorie; }
+
+    public List<Commande> getLesCommandes() { return lesCommandes; }
+
+    public void ajouterCommande(Commande uneCommande) {
+        if (this.lesCommandes == null) {
+            setLesCommandes();
+        }
+        if (!this.lesCommandes.contains(uneCommande)) {
             this.lesCommandes.add(uneCommande);
         }
     }
 
     public void cumulCA() {
-        this.caClient = 0;
-
-        for (Commande uneCommande : this.lesCommandes) {
-            this.caClient += uneCommande.valoriserCommande();
+        this.caClient = 0.0;
+        if (this.lesCommandes != null) {
+            for (Commande uneCommande : this.lesCommandes) {
+                this.caClient += uneCommande.valoriserCommande();
+            }
         }
     }
 
     public Commande getCommandeById(int idCommande) {
-        for (Commande uneCommande : this.lesCommandes) {
-            if (uneCommande.getIdCommande() == idCommande) {
-                return uneCommande;
+        if (this.lesCommandes != null) {
+            for (Commande uneCommande : this.lesCommandes) {
+                if (uneCommande.getIdCommande() == idCommande) {
+                    return uneCommande;
+                }
             }
         }
-
         return null;
     }
 
     public void supprimerCommande(Commande uneCommande) {
-        this.lesCommandes.remove(uneCommande);
+        if (this.lesCommandes != null && uneCommande != null) {
+            this.lesCommandes.remove(uneCommande);
+        }
     }
 }
