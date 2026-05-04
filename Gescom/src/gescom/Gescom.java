@@ -42,6 +42,7 @@ public class Gescom {
         System.out.println("6..Supprimer une ligne d'une commande");
         System.out.println("7..Afficher le CA d'un client");
         System.out.println("8..Afficher le CA de tous les clients");
+        System.out.println("9..Afficher le top ventes");
         System.out.println("0..Quitter");
 
         System.out.print("\nVotre choix : ");
