@@ -2,9 +2,9 @@ package gescom;
 
 import models.*;
 import services.*;
+import utilitaires.Outils;
 import java.util.Scanner;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class Gescom {
 
@@ -27,6 +27,7 @@ public class Gescom {
                 case 6: supprimerLigne(unRepresentant); break;
                 case 7: afficherCaClient(unRepresentant); break;
                 case 8: afficherCaClients(unRepresentant); break;
+                case 9: afficherTopVentes(unRepresentant); break; // Ajout du menu Top Ventes
             }
             choix = menu();
         }
@@ -49,11 +50,17 @@ public class Gescom {
         return sc.nextInt();
     }
 
-    private static void afficherCaClient(Representant unRepresentant) {
+    // ==========================================
+    // MÉTHODE POUR ÉVITER LA DUPLICATION DE CODE
+    // ==========================================
+    private static Client trouverClientInteractif(Representant unRepresentant) {
         System.out.print("Id client : ");
         int idClient = sc.nextInt();
+        return unRepresentant.getClientById(idClient);
+    }
 
-        Client unClient = unRepresentant.getClientById(idClient);
+    private static void afficherCaClient(Representant unRepresentant) {
+        Client unClient = trouverClientInteractif(unRepresentant);
 
         if (unClient != null) {
             unClient.cumulCA();
@@ -64,10 +71,7 @@ public class Gescom {
     }
 
     private static void afficherCommandesClient(Representant unRepresentant) {
-        System.out.print("Id client : ");
-        int idClient = sc.nextInt();
-
-        Client unClient = unRepresentant.getClientById(idClient);
+        Client unClient = trouverClientInteractif(unRepresentant);
 
         if (unClient != null && unClient.getLesCommandes() != null) {
             for (Commande uneCommande : unClient.getLesCommandes()) {
@@ -156,10 +160,7 @@ public class Gescom {
     }
 
     private static void rechercherCommande(Representant unRepresentant) {
-        System.out.print("Id client : ");
-        int idClient = sc.nextInt();
-
-        Client unClient = unRepresentant.getClientById(idClient);
+        Client unClient = trouverClientInteractif(unRepresentant);
 
         if (unClient != null) {
             System.out.print("Id commande : ");
@@ -178,10 +179,7 @@ public class Gescom {
     }
 
     private static void supprimerLigne(Representant unRepresentant) {
-        System.out.print("Id client : ");
-        int idClient = sc.nextInt();
-
-        Client unClient = unRepresentant.getClientById(idClient);
+        Client unClient = trouverClientInteractif(unRepresentant);
 
         if (unClient != null) {
             System.out.print("Id commande : ");
@@ -210,17 +208,16 @@ public class Gescom {
     }
 
     private static void ajouterCommande(Representant unRepresentant) {
-        System.out.print("Id client : ");
-        int idClient = sc.nextInt();
-
-        Client unClient = unRepresentant.getClientById(idClient);
+        Client unClient = trouverClientInteractif(unRepresentant);
 
         if (unClient != null) {
             System.out.print("Id de la nouvelle commande : ");
             int idCommande = sc.nextInt();
 
-            // Pour simplifier, on prend automatiquement la date d'aujourd'hui
-            Commande uneCommande = new Commande(idCommande, new Date());
+            // Remplacement pour utiliser Outils comme demandé dans le TP
+            System.out.print("Date de commande (jj/mm/aaaa) : ");
+            String dateTexte = sc.next();
+            Commande uneCommande = new Commande(idCommande, Outils.stringToDate(dateTexte));
             unClient.ajouterCommande(uneCommande);
 
             System.out.print("Id de l'article à commander : ");
@@ -243,7 +240,7 @@ public class Gescom {
     }
 
     private static void afficherCommande(Commande uneCommande) {
-        System.out.println("\tCommande : " + uneCommande.getIdCommande() + " (Date: " + uneCommande.getDateCommande() + ")");
+        System.out.println("\tCommande : " + uneCommande.getIdCommande() + " (Date: " + Outils.dateToString(uneCommande.getDateCommande()) + ")");
 
         if (uneCommande.getLesLignes() != null) {
             for (Ligne uneLigne : uneCommande.getLesLignes()) {
@@ -251,6 +248,58 @@ public class Gescom {
                         "\t\t- Article " + uneLigne.getUnArticle().getIdArticle()
                                 + " (" + uneLigne.getUnArticle().getDesignation() + ")"
                                 + " | Quantité : " + uneLigne.getQteCommande()
+                );
+            }
+        }
+    }
+
+    // ==========================================
+    // EXTENSION : TOP VENTES
+    // ==========================================
+    private static void afficherTopVentes(Representant unRepresentant) {
+        // 1. Initialiser les quantités à 0 pour tous les articles de la BdD
+        for (Article unArticle : bdd.getNosArticles()) {
+            unArticle.setQteTotaleCommandee(0);
+        }
+
+        // 2. Calculer le nombre d'articles commandés
+        if (unRepresentant.getLesClients() != null) {
+            for (Client unClient : unRepresentant.getLesClients()) {
+                if (unClient.getLesCommandes() != null) {
+                    for (Commande uneCommande : unClient.getLesCommandes()) {
+                        if (uneCommande.getLesLignes() != null) {
+                            for (Ligne uneLigne : uneCommande.getLesLignes()) {
+                                Article articleConcerne = uneLigne.getUnArticle();
+                                int qteExistante = articleConcerne.getQteTotaleCommandee();
+                                articleConcerne.setQteTotaleCommandee(qteExistante + uneLigne.getQteCommande());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 3. Trier les articles selon l'algorithme du TP
+        ArrayList<Article> lesArticlesTries = new ArrayList<Article>();
+
+        for (Article unArticle : bdd.getNosArticles()) {
+            int position = 0;
+            // Parcourir tant que la quantité de l'article dans la liste est plus grande ou égale
+            while (position < lesArticlesTries.size() && lesArticlesTries.get(position).getQteTotaleCommandee() >= unArticle.getQteTotaleCommandee()) {
+                position++;
+            }
+            // Insérer l'article à cet endroit
+            lesArticlesTries.add(position, unArticle);
+        }
+
+        // 4. Affichage final
+        System.out.println("\nTop des ventes :");
+        for (Article unArticle : lesArticlesTries) {
+            if (unArticle.getQteTotaleCommandee() > 0) {
+                System.out.println(
+                        unArticle.getIdArticle() + " " + unArticle.getDesignation()
+                                + ", prix TTC: " + unArticle.getPrixTTC()
+                                + ", qté totale commandée: " + unArticle.getQteTotaleCommandee()
                 );
             }
         }

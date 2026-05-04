@@ -192,4 +192,8 @@ public class BdD {
         unClient.ajouterCommande(nosCommandes.get(9));
         nosClients.add(unClient);
     }
+
+    public List<Article> getNosArticles() {
+        return nosArticles;
+    }
 }

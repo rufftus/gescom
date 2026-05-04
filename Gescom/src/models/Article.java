@@ -7,6 +7,9 @@ public class Article {
     private int qteStock;
     private Double prix;
 
+    // Nouveauté pour l'extension "Top Ventes"
+    private int qteTotaleCommandee;
+
     // Relations 1..1
     private Tva uneTva;
     private Famille uneFamille;
@@ -18,7 +21,13 @@ public class Article {
         this.prix = prix;
         this.uneTva = uneTva;
         this.uneFamille = uneFamille;
-        this.caArticle = 0.0; // Initialisé à 0
+        this.caArticle = 0.0;
+        this.qteTotaleCommandee = 0; // Initialisé à 0
+    }
+
+    // --- Méthode ajoutée pour calculer le Prix TTC ---
+    public double getPrixTTC() {
+        return this.prix * (1 + (this.uneTva.getTauxTva() / 100.0));
     }
 
     // --- Getters et Setters ---
@@ -42,4 +51,8 @@ public class Article {
 
     public Famille getUneFamille() { return uneFamille; }
     public void setUneFamille(Famille uneFamille) { this.uneFamille = uneFamille; }
+
+    // --- Getters et Setters pour la quantité totale ---
+    public int getQteTotaleCommandee() { return qteTotaleCommandee; }
+    public void setQteTotaleCommandee(int qteTotaleCommandee) { this.qteTotaleCommandee = qteTotaleCommandee; }
 }
